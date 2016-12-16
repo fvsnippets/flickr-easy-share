@@ -1,3 +1,7 @@
+UPDATE: Mentioned "link" below is now generated using a custom (user defined) javascript, just refering to offline disponible flickr thumbnails url (along with sizes, photo-title, main-url, etc). That allows to use img srcset attribute, adding a "nofollow" to links. In two word: full flexibility.
+
+--
+
 # flickr-easy-share
 Get flickr photo links, in html img and anchor tags format, without accesing flickr web site, and offline disponible.
 
