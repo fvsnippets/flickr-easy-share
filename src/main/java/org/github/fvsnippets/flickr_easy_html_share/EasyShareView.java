@@ -2,6 +2,7 @@ package org.github.fvsnippets.flickr_easy_html_share;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.apache.commons.lang3.StringEscapeUtils.escapeHtml4;
+import static org.github.fvsnippets.flickr_easy_html_share.model.Picture.SIZE_NOT_FOUND_URL;
 
 import java.io.File;
 import java.util.HashSet;
@@ -61,7 +62,7 @@ public class EasyShareView {
 		return 
 				"if [ ! -e \"" + file + "\" ]; then \n" +
 				"  echo \"Pictures left to download: " + picturesLeft + ".\" \n" +
-				"  wget -O \"" + tempFile + "\" \"" + picture.getCurrentPictureUrl(shareSizeEnum) + "\" && mv \"" + tempFile + "\" \"" + file + "\" \n" +
+				"  wget -O \"" + tempFile + "\" \"http" + picture.getThumbnailUrl(shareSizeEnum) + "\" && mv \"" + tempFile + "\" \"" + file + "\" \n" +
 				"fi \n";
 	}
 	
@@ -97,30 +98,117 @@ public class EasyShareView {
 		return script.toString();
 	}
 	
-	public String albumHtml(Album album, ShareSizeEnum expectedThumbnailSize, String pathAlias, String linkTarget, String linkTitlePrefix) {
+	public String albumHtml(Album album, ShareSizeEnum expectedThumbnailSize, String pathAlias) {
 		StringBuilder html = new StringBuilder();
 		
 		html.append("<html> \n");
 		html.append("<head> \n");
 		html.append("<title>" + album.getName() + "</title> \n");
 		html.append("<script type=\"text/javascript\"> \n");
-		html.append("function loadShares() { \n");
-		html.append("  var size = document.getElementById(\"sizes\").options[document.getElementById(\"sizes\").selectedIndex].value; \n");
-		html.append("  var textareas = document.getElementsByTagName(\"textarea\"); \n");
-		html.append("  for (var i = 0; i < textareas.length; i++) { \n");
-		html.append("    var pictureId = textareas[i].id; \n");
-		html.append("    textareas[i].value = unescape(document.getElementById(\"hidden_\" + pictureId + \"_\" + size).value); \n");
+		html.append("\n");
+		for (ShareSizeEnum shareSizeEnum : ShareSizeEnum.values()) {
+			html.append("var width_" + shareSizeEnum.name() + " = " + shareSizeEnum.getWidth() + "; \n");
+		}
+		html.append("function executeShareScript() { \n");
+		html.append("  var _protocol = document.getElementById('protocols').options[document.getElementById('protocols').selectedIndex].value; \n");
+		html.append("\n");
+		html.append("  var _shareScript = document.getElementById('custom_share').value; \n");
+		html.append("  if (_shareScript.length == 0) { \n");
+		html.append("    return; \n");
+		html.append("  } \n");
+		html.append("\n");
+		html.append("  var _textareas = document.getElementsByTagName('textarea'); \n");
+		html.append("  for (var _currentTextAreaIndex = 0; _currentTextAreaIndex < _textareas.length; _currentTextAreaIndex++) { \n"); 
+		html.append("    var _pictureId = _textareas[_currentTextAreaIndex].id; \n");
+		html.append("    if (_pictureId != 'custom_share') { \n");
+		html.append("      var pictureUrl = _protocol + document.getElementById('hidden_' + _pictureId + '_url').value; \n"); 
+		html.append("      var pictureTitle = document.getElementById('hidden_' + _pictureId + '_title').value; \n");
+		html.append("\n");
+		for (ShareSizeEnum shareSizeEnum : ShareSizeEnum.values()) {
+			html.append("      var url_" + shareSizeEnum.name() + " = _protocol + document.getElementById('hidden_' + _pictureId + '_' + '" + shareSizeEnum.name() + "_url').value; \n");
+			html.append("      var height_" + shareSizeEnum.name() + " = document.getElementById('hidden_' + _pictureId + '_' + '" + shareSizeEnum.name() + "_height').value; \n");
+			html.append("\n");
+		}
+		html.append("      try { \n");
+		html.append("        eval(_shareScript); \n");
+		html.append("\n");
+		html.append("        if (share.includes('" + SIZE_NOT_FOUND_URL + "')) { \n");
+		html.append("          share = 'Size not available'; \n"); 
+		html.append("        } \n");
+		html.append("\n");
+		html.append("      _textareas[_currentTextAreaIndex].value = unescape(share); \n");
+		html.append("      } catch (err) { \n");
+		html.append("        alert(err + '\\nDetail: Current pictureId was ' + _pictureId); \n");
+		html.append("        throw err; \n");
+		html.append("      } \n");
+		html.append("    } \n");
 		html.append("  } \n");
 		html.append("} \n");
+		html.append("// Taken from http://stackoverflow.com/questions/5796718/html-entity-decode \n");
+		html.append("var decodeEntities = (function() { \n");
+		html.append("  // this prevents any overhead from creating the object each time \n");
+		html.append("  var element = document.createElement('div'); \n");
+		html.append("\n");
+		html.append("  function decodeHTMLEntities (str) { \n");
+		html.append("    if(str && typeof str === 'string') { \n");
+		html.append("      // strip script/html tags \n");
+		html.append("      str = str.replace(/<script[^>]*>([\\S\\s]*?)<\\/script>/gmi, ''); \n");
+		html.append("      str = str.replace(/<\\/?\\w(?:[^\"'>]|\"[^\"]*\"|'[^']*')*>/gmi, ''); \n");
+		html.append("      element.innerHTML = str; \n");
+		html.append("      str = element.textContent; \n");
+		html.append("      element.textContent = ''; \n");
+		html.append("    } \n");
+		html.append("\n");
+		html.append("    return str; \n");
+		html.append("  } \n");
+		html.append("\n");
+		html.append("  return decodeHTMLEntities; \n");
+		html.append("})(); \n");
 		html.append("</script> \n");
 		html.append("</head> \n");
-		html.append("<body onload=\"loadShares();\"> \n");
+		
+		html.append("<body> \n");
 		html.append("<h1>" + escapeHtml4(album.getName()) + "</h1> \n");
-		html.append("<select id=\"sizes\" type=\"select\" onchange=\"loadShares();\"> \n");
+		
+		html.append("protocol: \n"); 
+		html.append("<select id=\"protocols\" type=\"select\"> \n"); 
+		html.append("  <option value=\"http\">http</option> \n");
+		html.append("  <option value=\"https\" selected=\"selected\">https</option> \n");
+		html.append("</select> \n"); 
+		html.append("<br> \n");
+		html.append("<br> \n");
+		html.append("Build your own!:<br> \n");
+		html.append("<textarea width=\"800\" height=\"200\" rows=\"4\" cols=\"100\" id=\"custom_share\"></textarea> \n");
+		html.append("<br> \n");
+		html.append("<button onclick=\"executeShareScript();\" type=\"button\">Update</button> \n");
+		html.append("<br> \n");
+		html.append("<br> \n");
+		html.append("<u>Quick tutorial</u>:<br> \n");
+		html.append("Build your own chain using javascript and leave it (the chain) inside variable &quot;share&quot;. URLs, widths and heights are available inside special predefined variables.<br> \n");
+		html.append("<br> \n");
+		html.append("<i>Predefined variables are</i>:<br> \n");
+		html.append("pictureUrl ; pictureTitle ; url_${size} ; width_${size} ; height_${size}<br> \n");
+		html.append("<br> \n");
+		html.append("Where ${size} is one of: <br> \n");
 		for (ShareSizeEnum shareSizeEnum : ShareSizeEnum.values()) {
-			html.append("<option value=\"" + shareSizeEnum.name() + "\">" + shareSizeEnum.getDescription() + "</option> \n");
+			html.append("<b>" + shareSizeEnum.name() + "</b> (" + shareSizeEnum.getDescription() + "), ");
 		}
-		html.append("</select> \n");
+		html.deleteCharAt(html.length() - 1);
+		html.append("\n");
+		html.append("<br> \n");
+		html.append("i.e.: available data for 640 is inside predefined variables url_z, width_z and height_z \n");
+		html.append("<br> \n");
+		html.append("<br> \n");
+		
+		html.append("<div id=\"example1\" style=\"visibility: hidden; margin: 0; padding: 0; height: 0;\">share = &apos;&lt;a href=&quot;&apos; + pictureUrl + &apos;&quot; title=&quot;Expand &apos; + pictureTitle + &apos;&quot;&gt;&lt;img title=&quot;&apos; + pictureTitle + &apos;&quot; alt=&quot;&apos; + pictureTitle + &apos;&quot; src=&quot;&apos; + url_Z + &apos;&quot; /&gt;&lt;/a&gt&apos;;</div> \n");
+		html.append("<div id=\"example2\" style=\"visibility: hidden; margin: 0; padding: 0; height: 0;\">share = &apos;&lt;a href=&quot;&apos; + pictureUrl + &apos;&quot; title=&quot;Expand &apos; + pictureTitle + &apos;&quot;&gt;&lt;img title=&quot;&apos; + pictureTitle + &apos;&quot; alt=&quot;&apos; + pictureTitle + &apos;&quot; src=&quot;&apos; + url_Z + &apos;&quot; widht=&quot;&apos; + width_Z + &apos;&quot; height=&quot;&apos; + height_Z + &apos;&quot; /&gt;&lt;/a&gt&apos;;</div> \n");
+		html.append("<div id=\"example3\" style=\"visibility: hidden; margin: 0; padding: 0; height: 0;\">share = &apos;&lt;a href=&quot;&apos; + pictureUrl + &apos;&quot; title=&quot;Expand &apos; + pictureTitle + &apos;&quot;&gt;&lt;img title=&quot;&apos; + pictureTitle + &apos;&quot; alt=&quot;&apos; + pictureTitle + &apos;&quot; src=&quot;&apos; + url_Z + &apos;&quot; srcset=&quot;&apos; + url_S + &apos; &apos; + width_S + &apos;w, &apos; + url_N + &apos; &apos; + width_N + &apos;w, &apos; + url_M + &apos; &apos; + width_M + &apos;w, &apos; + url_Z + &apos; &apos; + width_Z + &apos;w, &apos; + url_C + &apos; &apos; + width_C + &apos;w&quot; sizes=&quot;(max-width: &apos; + width_Z + &apos;px): 100vw, (min-width: &apos; + (width_Z * 0.15625 + width_Z) + &apos;px): &apos; + width_C + &apos;px, &apos; + width_Z + &apos;px&quot; /&gt;&lt;/a&gt;&apos;;</div> \n");
+		html.append("<div id=\"example4\" style=\"visibility: hidden; margin: 0; padding: 0; height: 0;\">share = &apos;&lt;center&gt;&lt;div style=&quot;margin: 0px; padding: 0px; max-width: 640px;&quot&gt;&lt;a href=&quot;&apos; + pictureUrl + &apos;&quot; title=&quot;Expand &apos; + pictureTitle + &apos;&quot; rel=&quot;nofollow&quot;&gt;&lt;img title=&quot;&apos; + pictureTitle + &apos;&quot; alt=&quot;&apos; + pictureTitle + &apos;&quot; src=&quot;&apos; + url_Z + &apos;&quot; srcset=&quot;&apos; + url_S + &apos; &apos; + width_S + &apos;w, &apos; + url_N + &apos; &apos; + width_N + &apos;w, &apos; + url_M + &apos; &apos; + width_M + &apos;w, &apos; + url_Z + &apos; &apos; + width_Z + &apos;w&quot; sizes=&quot;(max-width: &apos; + width_Z + &apos;px): 100vw, &apos; + width_Z + &apos;px&quot; /&gt;&lt;/a&gt;&lt;/div&gt;&lt;/center&gt;&apos;;</div> \n");
+		html.append("<button onclick=\"document.getElementById('custom_share').value = decodeEntities(document.getElementById('example1').innerHTML);\" type=\"button\">Load example1</button> \n"); 
+		html.append("<button onclick=\"document.getElementById('custom_share').value = decodeEntities(document.getElementById('example2').innerHTML);\" type=\"button\">Load example2</button> \n"); 
+		html.append("<button onclick=\"document.getElementById('custom_share').value = decodeEntities(document.getElementById('example3').innerHTML);\" type=\"button\">Load example3</button> \n");
+		html.append("<button onclick=\"document.getElementById('custom_share').value = decodeEntities(document.getElementById('example4').innerHTML);\" type=\"button\">Load example4</button> \n");
+		
 		html.append("<p>&nbsp;</p> \n");
 		
 		html.append("<div style=\"display: table; width: 100%; \"> \n");
@@ -135,10 +223,16 @@ public class EasyShareView {
 			html.append("<div style=\"display: table-cell; width: 33%;\"> \n");
 			html.append("  <img alt=\"" + escapeHtml4(picture.getTitle()) + "\" onclick=\"document.getElementById('" + pictureId + "').select();\" src=\"" + thumbnailPath + "\"> \n");
 			html.append("  <br> \n");
+			html.append("  <div style=\"width: " + expectedThumbnailSize.getWidth() + "px; background: #000000; color: #ffffff; margin-top: -4px; text-align: center;\">" + pictureId + "</div> \n");
+			html.append("  <input type=\"hidden\" value=\"" + escapeHtml4(picture.getPictureUrl(pathAlias)) + "\" id=\"hidden_" + pictureId + "_url\"> \n");
+			html.append("  <input type=\"hidden\" value=\"" + escapeHtml4(picture.getTitle()) + "\" id=\"hidden_" + pictureId + "_title\"> \n");
+			
 			for (ShareSizeEnum shareSizeEnum : ShareSizeEnum.values()) {
-				html.append("  <input type=\"hidden\" value=\"" + escapeHtml4(picture.getShare(shareSizeEnum, pathAlias, linkTarget, linkTitlePrefix)) + "\" id=\"hidden_" + pictureId + "_" + shareSizeEnum.name() + "\"> \n");
+				html.append("  <input type=\"hidden\" value=\"" + escapeHtml4(picture.getThumbnailUrl(shareSizeEnum)) + "\" id=\"hidden_" + pictureId + "_" + shareSizeEnum.name() + "_url\"> \n");
+				html.append("  <input type=\"hidden\" value=\"" + picture.getHeight(shareSizeEnum) + "\" id=\"hidden_" + pictureId + "_" + shareSizeEnum.name() + "_height\"> \n");
 			}
-			html.append("  <textarea onclick=\"document.getElementById('" + pictureId + "').blur(); document.getElementById('" + pictureId + "').select();\" style=\"width: " + expectedThumbnailSize.getMaxWidth() + ";\" rows=\"2\" id=\"" + pictureId + "\">&nbsp;</textarea> \n");
+			
+			html.append("  <textarea onclick=\"document.getElementById('" + pictureId + "').blur(); document.getElementById('" + pictureId + "').select();\" style=\"width: " + expectedThumbnailSize.getWidth() + ";\" rows=\"2\" id=\"" + pictureId + "\">&nbsp;</textarea> \n");
 			html.append("  <br><br> \n");
 			html.append("</div> \n");
 			

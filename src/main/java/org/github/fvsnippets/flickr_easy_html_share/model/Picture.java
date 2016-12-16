@@ -12,6 +12,7 @@ import com.flickr4java.flickr.photos.Photo;
 
 
 public class Picture implements Comparable<Picture> {
+	public static final String SIZE_NOT_FOUND_URL = "://www.google.com/images/errors/robot.png";
 	private static final String UNNAMED_PICTURE = "unnamed-picture";
 	
 	private String id;
@@ -141,7 +142,7 @@ public class Picture implements Comparable<Picture> {
 		return lastUpdate;
 	}
 	
-	public void addSize(Size size) {
+	private void addSize(Size size) {
     	sizes.put(size.shareSizeEnum, size);
 	}
 	
@@ -149,23 +150,29 @@ public class Picture implements Comparable<Picture> {
 		sizes.clear();
 	}
 	
-	private String getPictureUrl(String pathAlias) {
-		return "http://www.flickr.com/photos/" + pathAlias + "/" + id + "/";
+	public String getPictureUrl(String pathAlias) {
+		return "://www.flickr.com/photos/" + pathAlias + "/" + id + "/";
 	}
 	
-	public String getCurrentPictureUrl(ShareSizeEnum shareSizeEnum) {
-		return "http://farm" + farm + ".staticflickr.com/" + server + "/" + id + "_" + shareSizeEnum.getSecret(this) + shareSizeEnum.getUrlSuffix() + "." + shareSizeEnum.getFormat(this);
-	}
-	
-	public String getShare(ShareSizeEnum shareSizeEnum, String pathAlias, String linkTarget, String linkTitlePrefix) {
+	public int getHeight(ShareSizeEnum shareSizeEnum) {
 		Size size = sizes.get(shareSizeEnum);
-		
 		if (size == null) {
-			return "Size not available.";
+			return -1;
 		}
 		
-		return "<a href=\"" + getPictureUrl(pathAlias) + "\" title=\"" + linkTitlePrefix + title + "\" target=\"" + linkTarget + "\"><img title=\""+ linkTitlePrefix + "\" alt=\"" + title + "\" width=\"" +
-				size.width + "\" height=\"" + size.height + "\" src=\"" + getCurrentPictureUrl(shareSizeEnum) + "\"></a>";  
+		return sizes.get(shareSizeEnum).getHeight();
+	}
+	
+	private boolean hasSize(ShareSizeEnum shareSizeEnum) {
+		return sizes.get(shareSizeEnum) != null;
+	}
+	
+	public String getThumbnailUrl(ShareSizeEnum shareSizeEnum) {
+		if (!hasSize(shareSizeEnum)) {
+			return SIZE_NOT_FOUND_URL;
+		}
+		
+		return "://farm" + farm + ".staticflickr.com/" + server + "/" + id + "_" + shareSizeEnum.getSecret(this) + shareSizeEnum.getUrlSuffix() + "." + shareSizeEnum.getFormat(this);
 	}
 	
 	@Override
@@ -184,22 +191,23 @@ public class Picture implements Comparable<Picture> {
 		return id.hashCode();
 	}
 	
-	public static class Size {
+	static class Size {
 		private ShareSizeEnum shareSizeEnum;
-		private int width;
 		private int height;
 		
-		Size(int flickr4JavaLabel, int width, int height) {
-			checkArgument(width > 0);
+		Size(int flickr4JavaLabel, int height) {
 			checkArgument(height > 0);
 			
-			this.width = width;
 			this.height = height;
 			this.shareSizeEnum = getByFlickr4JavaLabel(flickr4JavaLabel);
 		}
 		
-		public Size(com.flickr4java.flickr.photos.Size flickr4JavaSize) {
-			this(flickr4JavaSize.getLabel(), flickr4JavaSize.getWidth(), flickr4JavaSize.getHeight());
+		private Size(com.flickr4java.flickr.photos.Size flickr4JavaSize) {
+			this(flickr4JavaSize.getLabel(), flickr4JavaSize.getHeight());
+		}
+		
+		private int getHeight() {
+			return height;
 		}
 		
 		protected Size() {

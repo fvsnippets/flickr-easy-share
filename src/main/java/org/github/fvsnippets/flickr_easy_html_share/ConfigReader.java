@@ -3,7 +3,6 @@ package org.github.fvsnippets.flickr_easy_html_share;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.System.in;
 import static java.lang.System.out;
-import static org.github.fvsnippets.flickr_easy_html_share.LinkTargetEnum.BLANK;
 import static org.github.fvsnippets.flickr_easy_html_share.model.ShareSizeEnum.N;
 
 import java.io.File;
@@ -17,7 +16,7 @@ import org.github.fvsnippets.flickr_easy_html_share.model.config.Config;
 import com.thoughtworks.xstream.XStream;
 
 public class ConfigReader {
-	private static Config readConfigFromUser(String defaultWorkingDirectory, ShareSizeEnum defaultThumbnailSize, LinkTargetEnum defaultLinkTarget, String defaultLinkTitlePrefix) {
+	private static Config readConfigFromUser(String defaultWorkingDirectory, ShareSizeEnum defaultThumbnailSize) {
 		Scanner scanner = new Scanner(in);
 		
 		try {
@@ -69,39 +68,7 @@ public class ConfigReader {
 				}
 			}
 			
-			out.println("Choose link target:");
-			for (LinkTargetEnum linkTargetEnum : LinkTargetEnum.values()) {
-				out.println(linkTargetEnum.getLabel() + ") " + linkTargetEnum.getHtmlReferenceRepresentation());
-			}
-			LinkTargetEnum linkTarget = null;
-			while (linkTarget == null) {
-				out.print("pick an option [" + defaultLinkTarget.getLabel() + "]: ");
-				String line = scanner.nextLine().trim().toUpperCase();
-				if (line.isEmpty()) {
-					linkTarget = defaultLinkTarget;
-				} else {
-					try {
-						linkTarget = LinkTargetEnum.getByLabel(line);
-					} catch (IllegalArgumentException e) {
-						// expected
-					}
-				}
-			}
-			String linkTargetValue = linkTarget.asHtmlRepresentation(scanner);
-			
-			out.print("Link title prefix, insert a single space for empty or blank for default [\"" + defaultLinkTitlePrefix + "\"]: ");
-			String linkTitlePrefix = scanner.nextLine();
-			if (!linkTitlePrefix.isEmpty()) {
-				if (linkTitlePrefix.equals(" ")) {
-					linkTitlePrefix = defaultLinkTitlePrefix;
-				} else {
-					if (!linkTitlePrefix.endsWith(" ")) {
-						linkTitlePrefix += " ";
-					}
-				}
-			}
-
-			return new Config(username, apiKey, sharedSecret, workingDirectoryPath, thumbnailSize, linkTargetValue, linkTitlePrefix);
+			return new Config(username, apiKey, sharedSecret, workingDirectoryPath, thumbnailSize);
 		} finally {
 			scanner.close();
 		}
@@ -122,11 +89,9 @@ public class ConfigReader {
 			out.println("- SharedSecret: [hidden, but you can see it in xml]");
 			out.println("- WorkingDirectory: " + config.getWorkingDirectory().getAbsolutePath());
 			out.println("- ThumbnailSize: " + config.getThumbnailSize() + " (" + config.getThumbnailSize().getDescription() + ")");
-			out.println("- LinkTarget: " + config.getLinkTarget());
-			out.println("- LinkTitlePrefix: " + config.getLinkTitlePrefix());
 			out.println();
 		} else {
-			config = readConfigFromUser(configFile.getParent(), N, BLANK, "Enlarge ");
+			config = readConfigFromUser(configFile.getParent(), N);
 
 			xstream.toXML(config, new FileOutputStream(configFile));
 		}

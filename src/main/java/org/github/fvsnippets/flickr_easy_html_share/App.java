@@ -148,7 +148,7 @@ public class App {
 		generatePicturesThatDontBelongToAnyAlbumAlbum(book);
 		for (Album album : book) {
 			File htmlAlbum = new File(htmlAlbumsDirectory, album.getId() + ".html");
-			saveToFile(htmlAlbum, easyShare.albumHtml(album, config.getThumbnailSize(), book.getPathalias(), config.getLinkTarget(), config.getLinkTitlePrefix()));
+			saveToFile(htmlAlbum, easyShare.albumHtml(album, config.getThumbnailSize(), book.getPathalias()));
 		}
 		
 		File index = new File(workingDirectory, ALBUMS_INDEX_FILE);

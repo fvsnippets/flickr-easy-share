@@ -1,6 +1,8 @@
 package org.github.fvsnippets.flickr_easy_html_share.model;
 
 import static com.flickr4java.flickr.photos.Size.LARGE;
+import static com.flickr4java.flickr.photos.Size.LARGE_1600;
+import static com.flickr4java.flickr.photos.Size.LARGE_2048;
 import static com.flickr4java.flickr.photos.Size.MEDIUM;
 import static com.flickr4java.flickr.photos.Size.MEDIUM_640;
 import static com.flickr4java.flickr.photos.Size.MEDIUM_800;
@@ -25,8 +27,8 @@ public enum ShareSizeEnum {
 	Z(MEDIUM_640, "_z", "640", 640),
 	C(MEDIUM_800, "_c", "800", 800),
 	L(LARGE, "_b", "1024", 1024),
-	H(LARGE, "_h", "1600", 1600),
-	K(LARGE, "_k", "2048", 2048),
+	H(LARGE_1600, "_h", "1600", 1600),
+	K(LARGE_2048, "_k", "2048", 2048),
 	O(ORIGINAL, "_o", "Original", 0) {
 		@Override
 		public String getSecret(Picture picture) {
@@ -43,13 +45,13 @@ public enum ShareSizeEnum {
 	private final int flickr4JavaLabel;
 	private final String urlSuffix;
 	private final String description;
-	private final int maxWidth;
+	private final int width;
 	
-	private ShareSizeEnum(int flickr4JavaLabel, String urlSuffix, String description, int maxWidth) {
+	private ShareSizeEnum(int flickr4JavaLabel, String urlSuffix, String description, int width) {
 		this.flickr4JavaLabel = flickr4JavaLabel;
 		this.urlSuffix = urlSuffix;
 		this.description = description;
-		this.maxWidth = maxWidth;
+		this.width = width;
 	}
 	
 	public String getUrlSuffix() {
@@ -60,8 +62,8 @@ public enum ShareSizeEnum {
 		return description;
 	}
 	
-	public int getMaxWidth() {
-		return maxWidth;
+	public int getWidth() {
+		return width;
 	}
 	
 	public String getSecret(Picture picture) {

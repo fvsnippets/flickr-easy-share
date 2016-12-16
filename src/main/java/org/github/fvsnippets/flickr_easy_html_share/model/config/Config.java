@@ -13,28 +13,22 @@ public class Config {
 	private String sharedSecret;
 	private String workingDirectoryPath;
 	private ShareSizeEnum thumbnailSize;
-	private String linkTarget;
-	private String linkTitlePrefix;
 	
 	private boolean isValidDirectory(File directory) {
 		return directory.isDirectory() && directory.exists();
 	}
 	
-	public Config(String username, String apiKey, String sharedSecret, String workingDirectoryPath, ShareSizeEnum thumbnailSize, String linkTarget, String linkTitlePrefix) {
+	public Config(String username, String apiKey, String sharedSecret, String workingDirectoryPath, ShareSizeEnum thumbnailSize) {
 		checkArgument(!checkNotNull(username).trim().isEmpty());
 		checkArgument(!checkNotNull(workingDirectoryPath).trim().isEmpty());
 		checkArgument(!checkNotNull(apiKey).trim().isEmpty());
 		checkArgument(!checkNotNull(sharedSecret).trim().isEmpty());
-		checkArgument(!checkNotNull(linkTarget).trim().isEmpty());
-		checkArgument(!checkNotNull(linkTitlePrefix).trim().isEmpty());
 		
 		this.username = username;
 		this.apiKey = apiKey;
 		this.sharedSecret = sharedSecret;
 		this.workingDirectoryPath = workingDirectoryPath;
 		this.thumbnailSize = checkNotNull(thumbnailSize);
-		this.linkTarget = linkTarget;
-		this.linkTitlePrefix = linkTitlePrefix;
 		
 		checkArgument(isValidDirectory(getWorkingDirectory()));
 	}
@@ -60,13 +54,5 @@ public class Config {
 	
 	public ShareSizeEnum getThumbnailSize() {
 		return thumbnailSize;
-	}
-	
-	public String getLinkTarget() {
-		return linkTarget;
-	}
-	
-	public String getLinkTitlePrefix() {
-		return linkTitlePrefix;
 	}
 }
