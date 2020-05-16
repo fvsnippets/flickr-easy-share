@@ -1,21 +1,21 @@
 package org.github.fvsnippets.flickr_easy_html_share.model;
 
-import static com.google.common.base.Optional.fromNullable;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.unmodifiableList;
+import static java.util.Optional.ofNullable;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.flickr4java.flickr.photos.Photo;
 import com.flickr4java.flickr.photosets.Photoset;
-import com.google.common.base.Optional;
 import com.google.common.collect.Ordering;
 
 public class Book implements Iterable<Album> {
@@ -78,11 +78,11 @@ public class Book implements Iterable<Album> {
 	}
 	
 	public Optional<Picture> getPicture(String pictureId) {
-		return fromNullable(picturesMap.get(pictureId));
+		return ofNullable(picturesMap.get(pictureId));
 	}
 	
 	public Optional<Album> getAlbum(String albumId) {
-		return fromNullable(albumsMap.get(albumId));
+		return ofNullable(albumsMap.get(albumId));
 	}
 	
 	public String getUsername() {

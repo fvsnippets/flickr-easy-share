@@ -27,8 +27,18 @@ public enum ShareSizeEnum {
 	Z(MEDIUM_640, "_z", "640", 640),
 	C(MEDIUM_800, "_c", "800", 800),
 	L(LARGE, "_b", "1024", 1024),
-	H(LARGE_1600, "_h", "1600", 1600),
-	K(LARGE_2048, "_k", "2048", 2048),
+	H(LARGE_1600, "_h", "1600", 1600) {
+		@Override
+		public String getSecret(Picture picture) {
+			return picture.getOriginalSecret();
+		}
+	},
+	K(LARGE_2048, "_k", "2048", 2048) {
+		@Override
+		public String getSecret(Picture picture) {
+			return picture.getOriginalSecret();
+		}
+	},
 	O(ORIGINAL, "_o", "Original", 0) {
 		@Override
 		public String getSecret(Picture picture) {

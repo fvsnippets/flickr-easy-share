@@ -110,7 +110,9 @@ public class EasyShareView {
 			html.append("var width_" + shareSizeEnum.name() + " = " + shareSizeEnum.getWidth() + "; \n");
 		}
 		html.append("function executeShareScript() { \n");
-		html.append("  var _protocol = document.getElementById('protocols').options[document.getElementById('protocols').selectedIndex].value; \n");
+		html.append("  // var _protocol = document.getElementById('protocols').options[document.getElementById('protocols').selectedIndex].value; \n");
+		html.append("  // only https is available\n");
+		html.append("  var _protocol = 'https'; \n");
 		html.append("\n");
 		html.append("  var _shareScript = document.getElementById('custom_share').value; \n");
 		html.append("  if (_shareScript.length == 0) { \n");
@@ -170,13 +172,16 @@ public class EasyShareView {
 		html.append("<body> \n");
 		html.append("<h1>" + escapeHtml4(album.getName()) + "</h1> \n");
 		
+		html.append("<!-- \n");
+		html.append("BEGIN: only https is available \n"); 
 		html.append("protocol: \n"); 
 		html.append("<select id=\"protocols\" type=\"select\"> \n"); 
 		html.append("  <option value=\"http\">http</option> \n");
 		html.append("  <option value=\"https\" selected=\"selected\">https</option> \n");
-		html.append("</select> \n"); 
-		html.append("<br> \n");
-		html.append("<br> \n");
+		html.append("</select> \n");
+		html.append("END: only https is available \n");
+		html.append("--> \n");
+		
 		html.append("Build your own!:<br> \n");
 		html.append("<textarea width=\"800\" height=\"200\" rows=\"4\" cols=\"100\" id=\"custom_share\"></textarea> \n");
 		html.append("<br> \n");
@@ -197,7 +202,6 @@ public class EasyShareView {
 		html.append("\n");
 		html.append("<br> \n");
 		html.append("i.e.: available data for 640 is inside predefined variables url_z, width_z and height_z \n");
-		html.append("<br> \n");
 		html.append("<br> \n");
 		
 		html.append("<div id=\"example1\" style=\"visibility: hidden; margin: 0; padding: 0; height: 0;\">share = &apos;&lt;a href=&quot;&apos; + pictureUrl + &apos;&quot; title=&quot;Expand &apos; + pictureTitle + &apos;&quot;&gt;&lt;img title=&quot;&apos; + pictureTitle + &apos;&quot; alt=&quot;&apos; + pictureTitle + &apos;&quot; src=&quot;&apos; + url_Z + &apos;&quot; /&gt;&lt;/a&gt&apos;;</div> \n");

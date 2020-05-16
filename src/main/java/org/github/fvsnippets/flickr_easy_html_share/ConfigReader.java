@@ -3,6 +3,7 @@ package org.github.fvsnippets.flickr_easy_html_share;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.System.in;
 import static java.lang.System.out;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.github.fvsnippets.flickr_easy_html_share.model.ShareSizeEnum.N;
 
 import java.io.File;
@@ -20,10 +21,10 @@ public class ConfigReader {
 		Scanner scanner = new Scanner(in);
 		
 		try {
-			String username = "";
-			while (username.trim().isEmpty()) {
+			String username = EMPTY;
+			while (username.isEmpty()) {
 				out.print("Username: ");
-				username = scanner.nextLine();
+				username = scanner.nextLine().trim();
 			}
 			
 			out.println("As you may have read, this app is not finished. You will need to provide an API and a Shared Secret from "
@@ -31,21 +32,21 @@ public class ConfigReader {
 					+ "here Api Key and Shared Secret when asked. These codes will be sent only to flickr through Flickr4Java (but "
 					+ "you can see the code if you don't trust me)." );
 			
-			String apiKey = "";
-			while (apiKey.trim().isEmpty()) {
+			String apiKey = EMPTY;
+			while (apiKey.isEmpty()) {
 				out.print("Api Key: ");
-				apiKey = scanner.nextLine();
+				apiKey = scanner.nextLine().trim();
 			}
 	
-			String sharedSecret = "";
-			while (sharedSecret.trim().isEmpty()) {
+			String sharedSecret = EMPTY;
+			while (sharedSecret.isEmpty()) {
 				out.print("Shared Secret: ");
-				sharedSecret = scanner.nextLine();
+				sharedSecret = scanner.nextLine().trim();
 			}
 			
 			out.print("Working directory [" + defaultWorkingDirectory + "]: ");
-			String workingDirectoryPath = scanner.nextLine();
-			if (workingDirectoryPath.trim().isEmpty()) {
+			String workingDirectoryPath = scanner.nextLine().trim();
+			if (workingDirectoryPath.isEmpty()) {
 				workingDirectoryPath = defaultWorkingDirectory;
 			}
 			

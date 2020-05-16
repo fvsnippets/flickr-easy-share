@@ -13,13 +13,12 @@ import static com.flickr4java.flickr.photos.Extras.URL_SQ;
 import static com.flickr4java.flickr.photos.Extras.URL_T;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.newHashSet;
-import static org.apache.commons.logging.LogFactory.getLog;
+import static java.lang.System.out;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
 import org.github.fvsnippets.flickr_easy_html_share.model.Book;
 
 import com.flickr4java.flickr.Flickr;
@@ -30,10 +29,9 @@ import com.flickr4java.flickr.photos.PhotoList;
 import com.flickr4java.flickr.photos.SearchParameters;
 
 public class UserPicturesReader {
-	private static final Log LOGGER = getLog(UserPicturesReader.class);
 	private static final int MAX_NUMBER_OF_PHOTOS_PER_PAGES = 100;
 	private static final int FLICKR_MAX_NUMBER_OF_PHOTOS_TO_ITERATE_PER_SEARCH = 4000;
-	private static final Set<String> EXTRAS = newHashSet(LAST_UPDATE, DATE_TAKEN, DATE_UPLOAD, ORIGINAL_FORMAT, URL_T, URL_S, URL_SQ, URL_M, URL_L, URL_O, "url_q", "url_n", "url_z", "url_c");
+	private static final Set<String> EXTRAS = newHashSet(LAST_UPDATE, DATE_TAKEN, DATE_UPLOAD, ORIGINAL_FORMAT, URL_T, URL_S, URL_SQ, URL_M, URL_L, URL_O, "url_q", "url_n", "url_z", "url_c", "url_h", "url_k");
 	
 	private final Flickr flickr;
 	
@@ -62,8 +60,8 @@ public class UserPicturesReader {
 	}
 	
 	private void logSearchPictures(User user, PhotoList<Photo> photoList, Date minUploadDateLimit, Date maxUploadDateLimit) {
-		LOGGER.info("Getting page #" + (photoList == null ? "1" : photoList.getPage() + 1) + " (pageSize:" + (MAX_NUMBER_OF_PHOTOS_PER_PAGES) + ") of photos "
-				+ "from user:" + user.getUsername() + " uploaded after " + showDate(minUploadDateLimit)  + " and before " + showDate(maxUploadDateLimit));
+		out.println("Getting page #" + (photoList == null ? "1" : photoList.getPage() + 1) + " (pageSize: " + (MAX_NUMBER_OF_PHOTOS_PER_PAGES) + ") of photos "
+				+ "from " + user.getUsername() + " uploaded after " + showDate(minUploadDateLimit)  + " and before " + showDate(maxUploadDateLimit));
 	}
 	
 	private Date maxUploadDateLimit(Date currentMaxUploadDateLimit, Photo photo) {
@@ -76,7 +74,7 @@ public class UserPicturesReader {
 	}
 
 	private void readPictures(User user, Book book, Date minUploadDateLimit) throws FlickrException {
-		// @See comment on #updatePicture(Book)
+		// @See comment on #readOrUpdatePictures(User,Book)
 
 		boolean thereAreMorePictures = true;
 		Date nextMaxUploadDateLimit = null;
@@ -106,12 +104,12 @@ public class UserPicturesReader {
 	}
 	
 	private void logSearchRecentlyUpdatedPictures(User user, PhotoList<Photo> photoList, Date minLastUpdateLimit) {
-		LOGGER.info("Getting page #" + (photoList == null ? "1" : photoList.getPage() + 1) + " (pageSize:" + MAX_NUMBER_OF_PHOTOS_PER_PAGES + ") of photos "
-				+ "from user:" + user.getUsername() + " updated after " + showDate(minLastUpdateLimit));
+		out.println("Getting page #" + (photoList == null ? "1" : photoList.getPage() + 1) + " (pageSize: " + MAX_NUMBER_OF_PHOTOS_PER_PAGES + ") of photos "
+				+ "from " + user.getUsername() + " updated after " + showDate(minLastUpdateLimit));
 	}
 	
 	private boolean doUpdatePictures(User user, Book book) throws FlickrException {
-		// @See comment on #updatePicture(Book)
+		// @See comment on #readOrUpdatePictures(User,Book)
 		
 		Date minLastUpdateLimit = book.getLastUpdate();
 		PhotoList<Photo> photoList = null;
@@ -149,7 +147,7 @@ public class UserPicturesReader {
 	}
 	
 	String pathAlias(String username) throws FlickrException {
-		LOGGER.info("Getting pathAlias for user:" + username);
+		out.println("Getting pathAlias for user: " + username);
 		return flickr.getPhotosInterface().recentlyUpdated(new Date(48 * 60 * 60 * 1024), newHashSet(PATH_ALIAS), 1, 1).get(0).getPathAlias();
 	}
 }

@@ -51,16 +51,18 @@ public class Picture implements Comparable<Picture> {
 			setLastUpdate(photo.getLastUpdate());
 			
 			clearSizes();
-	        addSize(new Size(photo.getLargeSize()));
-	        addSize(new Size(photo.getMedium640Size()));
-	        addSize(new Size(photo.getMedium800Size()));
-	        addSize(new Size(photo.getMediumSize()));
-	        addSize(new Size(photo.getOriginalSize()));
-	        addSize(new Size(photo.getSmall320Size()));
-	        addSize(new Size(photo.getSmallSize()));
-	        addSize(new Size(photo.getSquareLargeSize()));
-	        addSize(new Size(photo.getSquareSize()));
-	        addSize(new Size(photo.getThumbnailSize()));
+	        addSize(photo.getLargeSize());
+	        addSize(photo.getLarge2048Size());
+	        addSize(photo.getLarge1600Size());
+	        addSize(photo.getMedium640Size());
+	        addSize(photo.getMedium800Size());
+	        addSize(photo.getMediumSize());
+	        addSize(photo.getOriginalSize());
+	        addSize(photo.getSmall320Size());
+	        addSize(photo.getSmallSize());
+	        addSize(photo.getSquareLargeSize());
+	        addSize(photo.getSquareSize());
+	        addSize(photo.getThumbnailSize());
 		}
 		
 		return update;
@@ -144,6 +146,13 @@ public class Picture implements Comparable<Picture> {
 	
 	private void addSize(Size size) {
     	sizes.put(size.shareSizeEnum, size);
+	}
+	
+	private void addSize(com.flickr4java.flickr.photos.Size size) {
+		if (size == null) {
+			return;
+		}
+		addSize(new Size(size));
 	}
 	
 	public void clearSizes() {

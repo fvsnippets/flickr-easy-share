@@ -2,14 +2,15 @@ package org.github.fvsnippets.flickr_easy_html_share;
 
 import static com.flickr4java.flickr.Flickr.PRIVACY_LEVEL_NO_FILTER;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.apache.commons.logging.LogFactory.getLog;
+import static java.lang.System.out;
 
 import java.util.Collections;
 
-import org.apache.commons.logging.Log;
 import org.github.fvsnippets.flickr_easy_html_share.model.Album;
 import org.github.fvsnippets.flickr_easy_html_share.model.Book;
 import org.github.fvsnippets.flickr_easy_html_share.model.Picture;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.flickr4java.flickr.Flickr;
 import com.flickr4java.flickr.FlickrException;
@@ -20,7 +21,7 @@ import com.flickr4java.flickr.photosets.Photoset;
 import com.flickr4java.flickr.photosets.Photosets;
 
 public class UserAlbumsReader {
-	private static final Log LOGGER = getLog(UserAlbumsReader.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(UserAlbumsReader.class);
 	private static final int MAX_NUMBER_OF_PHOTOS_PER_PAGES = 500;
 	
 	private final Flickr flickr;
@@ -31,7 +32,7 @@ public class UserAlbumsReader {
 	
 	private void checkPictureBelongsToBook(String pictureId, Album album, Book book) {
 		if (!book.knowsPicture(pictureId)) {
-			throw new IllegalArgumentException("Album knows pictureId: " + pictureId + " but doesn't belong to Book");
+			throw new IllegalStateException("Album " + album.getId() + " knows pictureId: " + pictureId + " but doesn't belong to Book.");
 		}
 	}
 	
@@ -40,7 +41,7 @@ public class UserAlbumsReader {
 	}
 	
 	private void logGetAlbumPictures(Photoset photoset, PhotoList<Photo> photoList) {
-		LOGGER.info("Getting page #" + (photoList == null ? 1 : photoList.getPage() + 1) + " (pageSize:" + MAX_NUMBER_OF_PHOTOS_PER_PAGES + ") of photos from albumId:" 
+		out.println("Getting page #" + (photoList == null ? 1 : photoList.getPage() + 1) + " (pageSize: " + MAX_NUMBER_OF_PHOTOS_PER_PAGES + ") of photos from albumId " 
 				+ photoset.getId() + " (albumName: " + photoset.getTitle() + ")");
 	}
 	
@@ -54,7 +55,12 @@ public class UserAlbumsReader {
 
 			for (Photo photo : photoList) {
 				String pictureId = photo.getId();
-				checkPictureBelongsToBook(pictureId, album, book);
+				try {
+					checkPictureBelongsToBook(pictureId, album, book);
+				} catch (IllegalStateException e) {
+					LOGGER.warn(e.getMessage() + " Won't be included on album.");
+					continue;
+				}
 				
 				Picture picture = book.getPicture(pictureId).get();
 				album.addPicture(picture);
@@ -69,7 +75,7 @@ public class UserAlbumsReader {
 	}
 	
 	private void logGetAlbums(Book book, Photosets photosets) {
-		LOGGER.info("Getting page #" + (photosets == null ? 1 : photosets.getPage() + 1) + " (pageSize:" + MAX_NUMBER_OF_PHOTOS_PER_PAGES + ") of albums from user:" 
+		out.println("Getting page #" + (photosets == null ? 1 : photosets.getPage() + 1) + " (pageSize: " + MAX_NUMBER_OF_PHOTOS_PER_PAGES + ") of albums from " 
 				+ book.getUsername());
 	}
 	

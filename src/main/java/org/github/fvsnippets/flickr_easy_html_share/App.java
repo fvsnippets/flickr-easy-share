@@ -36,8 +36,8 @@ public class App {
 	public App(String configPath) throws FlickrException, IOException {
 		out.println();
 		out.println("flickr-easy-share");
-		out.println("Get flickr photo links, in html img and anchor tags format, without accesing flickr web site, and offline disponible.");
-		out.println("Copyright (C) 2016 Federico Valido");
+		out.println("Get flickr photo links, in HTML <img> and <anchor> tags format, without accesing flickr web site, and offline disponible.");
+		out.println("Copyright (C) 2016-2020 Federico Valido");
 		out.println();
 		out.println("This program is free software: you can redistribute it and/or modify");
 		out.println("it under the terms of the GNU General Public License as published by");
@@ -171,10 +171,13 @@ public class App {
 		out.println();
 		Book book = app.updateBook();
 		
+		out.println();
 		out.println("Generating view.");
 		app.generateView(book);
 		
-		out.println("Generated. Please execute " + DOWNLOAD_PICTURES_SH + " (bash script) from " + app.getConfig().getWorkingDirectory() +
-				" and open " + app.getConfig().getWorkingDirectory() + "/" + ALBUMS_INDEX_FILE + " in your browser.");
+		out.println();
+		out.println("Generated. Please execute " + app.getConfig().getWorkingDirectory() + DOWNLOAD_PICTURES_SH +
+				" and open file://" + app.getConfig().getWorkingDirectory() + "/" + ALBUMS_INDEX_FILE + " in your browser.");
+		out.println();
 	}
 }
