@@ -19,7 +19,7 @@
 		<throughtworks.xstream.version>1.4.7</throughtworks.xstream.version>
 		<google.guava.version>21.0</google.guava.version>
 		<apache.commons-lang3.version>3.3.2</apache.commons-lang3.version>
-		<logback.logback-classic.version>1.2.3</logback.logback-classic.version>
+		<logback.logback-classic.version>1.3.12</logback.logback-classic.version>
 		<maven.maven-compiler-plugin.version>2.3.2</maven.maven-compiler-plugin.version>
 	</properties>
 
